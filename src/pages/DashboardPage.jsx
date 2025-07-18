@@ -90,6 +90,12 @@ function DashboardPage() {
         wish.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
+    
+    if (statusFilter === "Expired") {
+      filtered = filtered.filter(
+        (wish) => !wish.isCompleted && new Date(wish.targetDate) < new Date()
+      );
+    }
 
     return filtered;
   };

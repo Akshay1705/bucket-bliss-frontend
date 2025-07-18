@@ -7,7 +7,7 @@ function FilterBar({
   searchQuery,
   setSearchQuery,
 }) {
-  const statusOptions = ["All", "Completed", "Pending"];
+  const statusOptions = ["All", "Completed", "Pending", "Expired"];
 
   return (
     <div className="bg-white rounded-xl shadow-md p-4 mb-6 transition-all">
@@ -72,14 +72,16 @@ function FilterBar({
       {/* Status Filter */}
       <div>
         <p className="font-semibold text-gray-700 mb-2">📊 Filter by Status:</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {statusOptions.map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1 rounded-full font-medium text-sm border ${
                 statusFilter === status
-                  ? "bg-blue-500 text-white border-black scale-105"
+                  ? status === "Expired"
+                    ? "bg-red-500 text-white border-black scale-105"
+                    : "bg-blue-500 text-white border-black scale-105"
                   : "bg-gray-200 text-gray-700 border-transparent hover:bg-gray-300"
               }`}
             >

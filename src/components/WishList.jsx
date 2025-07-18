@@ -3,15 +3,19 @@ import Swal from "sweetalert2";
 
 function WishList({ wishes, onMarkCompleted, onDeleteWish }) {
   if (!wishes || wishes.length === 0) {
-    return <p className="text-gray-600">No wishes found yet. 🫤</p>;
+    return (
+      <p className="text-center text-gray-500 text-lg mt-10">
+        No wishes yet... let your heart speak its first dream. 💫
+      </p>
+    );
   }
 
   const categoryColorMap = {
-    Travel: "bg-blue-200 text-blue-800",
-    Health: "bg-green-200 text-green-800",
-    Career: "bg-yellow-200 text-yellow-800",
-    Finance: "bg-purple-200 text-purple-800",
-    Personal: "bg-pink-200 text-pink-800",
+    Travel: "bg-blue-100 text-blue-700",
+    Health: "bg-green-100 text-green-700",
+    Career: "bg-yellow-100 text-yellow-700",
+    Finance: "bg-purple-100 text-purple-700",
+    Personal: "bg-pink-100 text-pink-700",
   };
 
   const handleDelete = (id) => {
@@ -36,40 +40,40 @@ function WishList({ wishes, onMarkCompleted, onDeleteWish }) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {wishes
         .sort((a, b) => new Date(a.targetDate) - new Date(b.targetDate))
         .map((wish) => {
           const categoryColor =
-            categoryColorMap[wish.category] || "bg-gray-200 text-gray-800";
+            categoryColorMap[wish.category] || "bg-gray-100 text-gray-700";
 
           const expired = isExpired(wish);
 
           return (
             <div
               key={wish._id}
-              className="relative border border-gray-300 rounded-lg p-4 bg-white shadow hover:shadow-md transition"
+              className="relative rounded-xl bg-white border border-gray-200 shadow-md hover:shadow-lg transition duration-200 p-5"
             >
               <button
                 onClick={() => handleDelete(wish._id)}
-                className="absolute top-2 right-2 text-red-500 hover:text-red-700 text-sm"
+                className="absolute top-3 right-3 text-red-500 hover:text-red-700 text-sm"
                 title="Delete Wish"
               >
                 ✖️
               </button>
 
               <div
-                className={`inline-block px-2 py-1 rounded-full text-xs font-semibold mb-2 ${categoryColor}`}
+                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-3 ${categoryColor}`}
               >
                 {wish.category}
               </div>
 
               {wish.tags && wish.tags.length > 0 && (
-                <div className="mb-2">
+                <div className="mb-3">
                   {wish.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full mr-1 mb-1"
+                      className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full mr-2 mb-1"
                     >
                       #{tag}
                     </span>
@@ -77,14 +81,16 @@ function WishList({ wishes, onMarkCompleted, onDeleteWish }) {
                 </div>
               )}
 
-              <h3 className="font-semibold text-lg mb-2">{wish.title}</h3>
+              <h3 className="text-lg font-bold text-gray-800 mb-2">
+                {wish.title}
+              </h3>
 
-              <p className="text-sm text-gray-600 mb-1">
-                Target Date: {format(new Date(wish.targetDate), "dd-MM-yyyy")}
+              <p className="text-sm text-gray-500 mb-1">
+                🎯 Target: {format(new Date(wish.targetDate), "dd-MM-yyyy")}
               </p>
 
               <p
-                className={`text-sm font-semibold mb-3 ${
+                className={`text-sm font-semibold mb-4 ${
                   wish.isCompleted
                     ? "text-green-600"
                     : expired
@@ -102,7 +108,7 @@ function WishList({ wishes, onMarkCompleted, onDeleteWish }) {
               {!wish.isCompleted && !expired && (
                 <button
                   onClick={() => onMarkCompleted(wish._id)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm w-full"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition"
                 >
                   Mark as Completed
                 </button>

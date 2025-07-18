@@ -5,17 +5,18 @@ const API_URL = "http://localhost:4000/api/wishes";
 
 const getToken = () => localStorage.getItem("bucketBlissToken");
 
-export const fetchWishes = async () => {
+export const fetchWishes = async (page = 1, limit = 10) => {
   try {
-    const response = await axios.get(API_URL, {
+    const response = await axios.get(`${API_URL}?page=${page}&limit=${limit}`, {
       headers: { Authorization: `Bearer ${getToken()}` },
     });
-    return response.data;
+    return response.data; // returns { total, page, totalPages, wishes }
   } catch (error) {
     console.error("Failed to fetch wishes:", error);
-    return [];
+    return { wishes: [], total: 0, page: 1, totalPages: 1 };
   }
 };
+
 
 export const addWish = async (wishData) => {
   try {

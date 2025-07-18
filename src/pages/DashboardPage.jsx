@@ -3,7 +3,7 @@ import StatusBar from "../components/StatusBar";
 import WishList from "../components/WishList";
 import AddWishForm from "../components/AddWishForm";
 import FilterBar from "../components/FilterBar";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   fetchWishes,
   addWish,
@@ -21,6 +21,9 @@ function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const categories = [
     { name: "Travel", color: "bg-blue-200 text-blue-800" },
     { name: "Health", color: "bg-green-200 text-green-800" },
@@ -29,20 +32,24 @@ function DashboardPage() {
     { name: "Personal", color: "bg-pink-200 text-pink-800" },
   ];
 
+  const loadWishes = useCallback(async () => {
+    setLoading(true);
+    const data = await fetchWishes(page, 3); // example limit: 9 per page
+    setWishes(data.wishes);
+    setTotalPages(data.totalPages || 1);
+    setLoading(false);
+  }, [page]);
+
   useEffect(() => {
     if (!getToken()) {
       window.location.href = "/";
     } else {
-      loadWishes();
+      const fetchData = async () => {
+        await loadWishes(); // 'page' is included in loadWishes via useCallback
+      };
+      fetchData();
     }
-  }, []);
-
-  const loadWishes = async () => {
-    setLoading(true);
-    const data = await fetchWishes();
-    setWishes(data);
-    setLoading(false);
-  };
+  }, [page, loadWishes]);
 
   const handleAddWish = async (wish) => {
     await addWish(wish);
@@ -112,28 +119,63 @@ function DashboardPage() {
         />
 
         {view === "view" && (
-          <FilterBar
-            categories={categories}
-            categoryFilter={categoryFilter}
-            setCategoryFilter={setCategoryFilter}
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
+          <>
+            <FilterBar
+              categories={categories}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+
+            {loading ? (
+              <p className="text-center mt-10 text-gray-500">
+                Loading wishes...
+              </p>
+            ) : (
+              <>
+                <WishList
+                  wishes={getFilteredWishes()}
+                  onMarkCompleted={handleMarkCompleted}
+                  onDeleteWish={handleDeleteWish}
+                />
+
+                {/* Pagination Controls */}
+                <div className="flex justify-center items-center mt-6 space-x-4">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage(page - 1)}
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      page === 1
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
+                    }`}
+                  >
+                    Previous
+                  </button>
+                  <span className="text-gray-700 font-medium">
+                    Page {page} of {totalPages}
+                  </span>
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => setPage(page + 1)}
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      page === totalPages
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </>
+            )}
+          </>
         )}
 
-        {loading ? (
-          <p className="text-center mt-10 text-gray-500">Loading wishes...</p>
-        ) : view === "add" ? (
-          <AddWishForm onAddWish={handleAddWish} />
-        ) : (
-          <WishList
-            wishes={getFilteredWishes()}
-            onMarkCompleted={handleMarkCompleted}
-            onDeleteWish={handleDeleteWish}
-          />
-        )}
+        {view === "add" && <AddWishForm onAddWish={handleAddWish} />}
       </div>
     </div>
   );

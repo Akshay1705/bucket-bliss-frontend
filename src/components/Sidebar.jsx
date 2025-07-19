@@ -4,7 +4,14 @@ function Sidebar({ onLogout, onViewWishes, onAddWish }) {
   return (
     <div className="w-56 bg-gray-50 h-screen sticky top-0 flex flex-col justify-between p-4 border-r">
       <div>
-        <h3 className="text-lg font-bold text-indigo-600 mb-4">WishCraft</h3>
+        {/* Logo at Top */}
+        <div className="flex items-center justify-center mb-4">
+          <img
+            src="/logo.png"
+            alt="WishCraft Logo"
+            className="w-20 h-20 object-contain"
+          />
+        </div>
 
         <button
           onClick={onViewWishes}
@@ -22,7 +29,9 @@ function Sidebar({ onLogout, onViewWishes, onAddWish }) {
       </div>
 
       <div>
-        <p className="text-sm text-gray-600 mb-3 font-medium">👤 {userName}</p>
+        <p className="text-sm text-gray-600 mb-3 font-medium text-center">
+          👤 {userName}
+        </p>
 
         <button
           onClick={() => {

@@ -13,7 +13,7 @@ import {
 import { getToken, logoutUser } from "../services/authService";
 
 function DashboardPage() {
-  const [wishes, setWishes] = useState([]);
+  const [allWishes, setAllWishes] = useState([]);
   const [view, setView] = useState("view");
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,7 @@ function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 3;
 
   const categories = [
     { name: "Travel", color: "bg-blue-200 text-blue-800" },
@@ -34,22 +34,18 @@ function DashboardPage() {
 
   const loadWishes = useCallback(async () => {
     setLoading(true);
-    const data = await fetchWishes(page, 3); // example limit: 9 per page
-    setWishes(data.wishes);
-    setTotalPages(data.totalPages || 1);
+    const data = await fetchWishes(1, 9999);
+    setAllWishes(data.wishes || []);
     setLoading(false);
-  }, [page]);
+  }, []);
 
   useEffect(() => {
     if (!getToken()) {
       window.location.href = "/";
     } else {
-      const fetchData = async () => {
-        await loadWishes(); // 'page' is included in loadWishes via useCallback
-      };
-      fetchData();
+      loadWishes();
     }
-  }, [page, loadWishes]);
+  }, [loadWishes]);
 
   const handleAddWish = async (wish) => {
     await addWish(wish);
@@ -68,7 +64,7 @@ function DashboardPage() {
   };
 
   const getFilteredWishes = () => {
-    let filtered = [...wishes];
+    let filtered = [...allWishes];
 
     if (categoryFilter !== "All") {
       filtered = filtered.filter((wish) => {
@@ -82,7 +78,13 @@ function DashboardPage() {
     if (statusFilter === "Completed") {
       filtered = filtered.filter((wish) => wish.isCompleted);
     } else if (statusFilter === "Pending") {
-      filtered = filtered.filter((wish) => !wish.isCompleted);
+      filtered = filtered.filter(
+        (wish) => !wish.isCompleted && new Date(wish.targetDate) >= new Date()
+      );
+    } else if (statusFilter === "Expired") {
+      filtered = filtered.filter(
+        (wish) => !wish.isCompleted && new Date(wish.targetDate) < new Date()
+      );
     }
 
     if (searchQuery.trim() !== "") {
@@ -90,18 +92,24 @@ function DashboardPage() {
         wish.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-    
-    if (statusFilter === "Expired") {
-      filtered = filtered.filter(
-        (wish) => !wish.isCompleted && new Date(wish.targetDate) < new Date()
-      );
-    }
 
     return filtered;
   };
 
-  const expiredCount = wishes.filter(
+  const filteredWishes = getFilteredWishes();
+  const totalPages = Math.ceil(filteredWishes.length / itemsPerPage);
+
+  const paginatedWishes = filteredWishes.slice(
+    (page - 1) * itemsPerPage,
+    page * itemsPerPage
+  );
+
+  const expiredCount = allWishes.filter(
     (w) => !w.isCompleted && new Date(w.targetDate) < new Date()
+  ).length;
+
+  const pendingCount = allWishes.filter(
+    (w) => !w.isCompleted && new Date(w.targetDate) >= new Date()
   ).length;
 
   return (
@@ -118,9 +126,9 @@ function DashboardPage() {
 
       <div className="flex-1 p-6 bg-gray-50 min-h-screen">
         <StatusBar
-          total={wishes.length}
-          completed={wishes.filter((w) => w.isCompleted).length}
-          pending={wishes.filter((w) => !w.isCompleted).length}
+          total={allWishes.length}
+          completed={allWishes.filter((w) => w.isCompleted).length}
+          pending={pendingCount}
           expired={expiredCount}
         />
 
@@ -143,12 +151,11 @@ function DashboardPage() {
             ) : (
               <>
                 <WishList
-                  wishes={getFilteredWishes()}
+                  wishes={paginatedWishes}
                   onMarkCompleted={handleMarkCompleted}
                   onDeleteWish={handleDeleteWish}
                 />
 
-                {/* Pagination Controls */}
                 <div className="flex justify-center items-center mt-6 space-x-4">
                   <button
                     disabled={page === 1}

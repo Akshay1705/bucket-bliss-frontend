@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:4000/api/auth";
+const API_URL = "https://wishcraft-backend-jsts.onrender.com/api/auth";
 
 // REGISTER user
 export const registerUser = async (name, email, password) => {

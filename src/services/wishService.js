@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-const API_URL = "http://localhost:4000/api/wishes";
+const API_URL = "https://wishcraft-backend-jsts.onrender.com//api/wishes";
 
 const getToken = () => localStorage.getItem("bucketBlissToken");
 

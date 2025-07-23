@@ -40,7 +40,8 @@ function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (!getToken()) {
+    const token = getToken();
+    if (!token) {
       window.location.href = "/";
     } else {
       loadWishes();
